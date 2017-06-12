@@ -28,7 +28,7 @@ $(function(){
 
 	// 抓取公車路線資料
 	$.ajax({
-		url: 'http://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/Kaohsiung?$format=json',
+		url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/Kaohsiung?$format=json',
 		method: 'GET',
 		success: function(result){
 			// 公車路線資料排序
