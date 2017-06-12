@@ -217,3 +217,7 @@ ul.bus-list li{
 .info-wrapper ~ ul.station-list{
 	padding-bottom: 150px;
 }
+
+.info-wrapper, #station-list{
+	display: none;
+}
