@@ -23,6 +23,9 @@ function initMap(){
 }
 
 $(function(){
+	// 可愛動畫
+	$('.eta').addClass('animated pulse');
+
 	// 抓取公車路線資料
 	$.ajax({
 		url: 'http://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/Kaohsiung?$format=json',
@@ -78,4 +81,3 @@ $(function(){
 		}
 	}
 });
-
