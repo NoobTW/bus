@@ -60,7 +60,7 @@ $(function(){
 				$('section#station-list').find('h2').html('<i class="fa fa-bus"></i> ' + routeName);
 
 				$.ajax({
-					url: 'http://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/Kaohsiung/' + routeName + '?$format=json',
+					url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/Kaohsiung/' + routeName + '?$format=json',
 					method: 'GET',
 					dataType: 'json',
 					success: function(data){
@@ -99,7 +99,7 @@ $(function(){
 							}).addClass('URhere');
 						});
 						$.ajax({
-							url: 'http://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Kaohsiung/' + routeName + '?$format=json',
+							url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Kaohsiung/' + routeName + '?$format=json',
 							method: 'GET',
 							dataType: 'json',
 							success: function(data){
