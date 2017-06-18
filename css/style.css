@@ -195,6 +195,7 @@ ul.bus-list li{
 	position: relative;
 	color: #f2f2f2;
 	transform: skew(-20deg);
+	cursor: pointer;
 }
 
 .direction div{
