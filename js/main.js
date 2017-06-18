@@ -260,7 +260,7 @@ function getEta(routeName, notFirstTime){
 						$li.addClass('comming');
 					}else if(eta < 0){
 						// $li.find('.eta').text(eta);
-						$li.find('.eta').text(eta + '駛離');
+						$li.find('.eta').text('駛離');
 						$li.find('.bus-plate').remove();
 						$li.removeClass('comming');
 					}else{
