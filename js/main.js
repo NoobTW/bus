@@ -84,6 +84,26 @@ $(function(){
 		}
 	});
 
+	// 點選目的站
+	$('body').delegate('.station-list li', 'click', function(){
+		$('.station-list').css('padding-bottom', '150px');
+		$('.info-wrapper').find('h4').text($(this).find('.station-name').text());
+		var depart;
+		var destination;
+		if($(this).data('direction') === 0){
+			depart = $('.direction-back').text().split('往')[1];
+			destination = $('.direction-forth').text().split('往')[1];
+		}else{
+			depart = $('.direction-forth').text().split('往')[1];
+			destination = $('.direction-back').text().split('往')[1];
+		}
+		$('.info-wrapper').find('#eta').html('抵達<br>'+$(this).find('.eta').text());
+		$('.left').find('.station-name').text(depart);
+		$('.right').find('.station-name').text(destination);
+		$('.info-wrapper').data('direction', $(this).data('direction'));
+		$('.info-wrapper').show();
+	});
+
 	// 上一頁的時候
 	window.onpopstate = function(){
 		if(this.history.state === null){
@@ -209,6 +229,10 @@ function getEta(routeName, notFirstTime){
 			data = dataForth.concat(dataBack);
 
 			var PlateNumbs = [];
+			var destinationStation = '';
+			if(!$('.info-wrapper:hidden').length){
+				destinationStation = $('.info-wrapper').find('h4').text();
+			}
 			Object.keys(data).forEach((i) => {
 				var StopUID = data[i].StopUID;
 				var direction = data[i].Direction;
@@ -225,7 +249,6 @@ function getEta(routeName, notFirstTime){
 				}else if(data[i].StopStatus){
 					eta = '-'
 				}else{
-					console.log(data[i].StopName.Zh_tw + ' ' + data[i].NextBusTime);
 					eta = Math.round((new Date(data[i].NextBusTime).getTime() - new Date().getTime()) / 1000 / 60);
 				}
 				if(!isNaN(eta)){
@@ -245,6 +268,9 @@ function getEta(routeName, notFirstTime){
 						$li.find('.eta').text(eta + '分');
 						$li.find('.bus-plate').remove();
 						$li.removeClass('comming');
+					}
+					if( data[i].StopName.Zh_tw === destinationStation && data[i].Direction === $('.info-wrapper').data('direction')){
+						$('.info-wrapper').find('#eta').html('抵達<br>' + eta + '分');
 					}
 				}else{
 					$li.find('.eta').text('-');
