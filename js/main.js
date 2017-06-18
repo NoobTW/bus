@@ -94,6 +94,7 @@ function getBus(routeName){
 		url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/Kaohsiung/' + routeName + '?$format=json',
 		method: 'GET',
 		success: function(result){
+			result = result.filter(x => x.RouteName.Zh_tw === routeName);
 			if(result[0].DestinationStopNameZh && result[0].DepartureStopNameZh){
 				$('.direction-forth').html('<div>往' + result[0].DestinationStopNameZh + '</div>');
 				$('.direction-back').html('<div>往' + result[0].DepartureStopNameZh + '</div>');
@@ -160,71 +161,14 @@ function getBus(routeName){
 					+ '</li>');
 					stops.push(a);
 				});
-				$('li').filter(function(){
-					return $(this).data('stationid') === nearestPosition;
-				}).addClass('URhere');
-			});
-			// 取得各站點進站時間
-			$.ajax({
-				url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Kaohsiung/' + routeName + '?$format=json',
-				method: 'GET',
-				dataType: 'json',
-				success: function(data){
-					var dataForth = [];
-					var dataBack = [];
-					Object.keys(data).forEach((i) => {
-						if(data[i].Direction === 0){
-							dataForth.push(data[i]);
-						}else{
-							dataBack.push(data[i]);
-						}
-					});
-					dataForth.sort(function(a, b){
-						return a.EstimateTime > b.EstimateTime ? 1 : -1
-					});
-					dataBack.sort(function(a, b){
-						return a.EstimateTime > b.EstimateTime ? 1 : -1
-					});
-
-					data = dataForth.concat(dataBack);
-
-					var PlateNumbs = [];
-					Object.keys(data).forEach((i) => {
-						var StopUID = data[i].StopUID;
-						var direction = data[i].Direction;
-						var PlateNumb = data[i].PlateNumb;
-						var $li = $('li').filter(function(){
-							return $(this).data('stationid') === StopUID &&
-							$(this).data('direction') === direction;
-						});
-						var eta = Math.round((new Date(data[i].NextBusTime).getTime() - new Date().getTime()) / 1000 / 60);
-						if(!isNaN(eta)){
-							if($.inArray(PlateNumb, PlateNumbs) < 0 && eta <= 1){
-								$li.find('.eta').text('進站中');
-								$li.prepend('<div class="bus-plate">' + PlateNumb + '</div>');
-								PlateNumbs.push(PlateNumb);
-								$li.addClass('comming');
-							}else if(eta < 0){
-								$li.find('.eta').text('駛離');
-								$li.removeClass('comming');
-							}else{
-								$li.find('.eta').text(eta + '分');
-								$li.removeClass('comming');
-							}
-						}else{
-							$li.find('.eta').text('-');
-							$li.removeClass('comming');
-						}
-					});
-					$('li.comming .eta').addClass('animated pulse infinite');
-					if($('#station-list li').filter(function(){return $(this).data('direction') === 0}).length){
-						$('#station-list li').filter(function(){return $(this).data('direction') === 0}).show();
-						$('#station-list li').filter(function(){return $(this).data('direction') === 1}).hide();
-					}else{
-						$('.direction-back').click();
-					}
+				if(nearestDistance <= 0.8){
+					$('li').filter(function(){
+						return $(this).data('stationid') === nearestPosition;
+					}).addClass('URhere');
 				}
 			});
+
+			getBusTime(routeName);
 		}
 	});
 
@@ -232,6 +176,74 @@ function getBus(routeName){
 	window.history.pushState({
 		routeName,
 	}, routeName, '?RouteName=' + routeName);
+}
+
+function getBusTime(routeName, notFirstTime){
+	// 取得各站點進站時間
+	$.ajax({
+		url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/Kaohsiung/' + routeName + '?$format=json',
+		method: 'GET',
+		dataType: 'json',
+		success: function(data){
+			var dataForth = [];
+			var dataBack = [];
+			Object.keys(data).forEach((i) => {
+				if(data[i].Direction === 0){
+					dataForth.push(data[i]);
+				}else{
+					dataBack.push(data[i]);
+				}
+			});
+			dataForth.sort(function(a, b){
+				return a.EstimateTime > b.EstimateTime ? 1 : -1
+			});
+			dataBack.sort(function(a, b){
+				return a.EstimateTime > b.EstimateTime ? 1 : -1
+			});
+
+			data = dataForth.concat(dataBack);
+
+			var PlateNumbs = [];
+			Object.keys(data).forEach((i) => {
+				var StopUID = data[i].StopUID;
+				var direction = data[i].Direction;
+				var PlateNumb = data[i].PlateNumb;
+				var $li = $('li').filter(function(){
+					return $(this).data('stationid') === StopUID &&
+					$(this).data('direction') === direction;
+				});
+				var eta = Math.round((new Date(data[i].NextBusTime).getTime() - new Date().getTime()) / 1000 / 60);
+				if(!isNaN(eta)){
+					if($.inArray(PlateNumb, PlateNumbs) < 0 && eta <= 1){
+						$li.find('.eta').text('進站中');
+						$li.prepend('<div class="bus-plate">' + PlateNumb + '</div>');
+						PlateNumbs.push(PlateNumb);
+						$li.addClass('comming');
+					}else if(eta < 0){
+						$li.find('.eta').text('駛離');
+						$li.removeClass('comming');
+					}else{
+						$li.find('.eta').text(eta + '分');
+						$li.removeClass('comming');
+					}
+				}else{
+					$li.find('.eta').text('-');
+					$li.removeClass('comming');
+				}
+			});
+			$('li.comming .eta').addClass('animated pulse infinite');
+			if(!notFirstTime) {
+				if($('#station-list li').filter(function(){return $(this).data('direction') === 0}).length){
+					$('#station-list li').filter(function(){return $(this).data('direction') === 0}).show();
+					$('#station-list li').filter(function(){return $(this).data('direction') === 1}).hide();
+				}else{
+					$('.direction-back').click();
+				}
+			}
+
+			setTimeout(getBusTime(routeName, true), 1000);
+		}
+	});
 }
 
 // 兩點距離
