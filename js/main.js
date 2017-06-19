@@ -46,6 +46,7 @@ $(function(){
 		method: 'GET',
 		cache: false,
 		success: function(result){
+			$('.info-wrapper').hide();
 			// 公車路線資料排序
 			result.sort(function(a, b){
 				return a.RouteName.Zh_tw > b.RouteName.Zh_tw ? 1 : -1;
